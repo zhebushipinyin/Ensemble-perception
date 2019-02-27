@@ -11,8 +11,9 @@ import pandas as pd
 tial_times = 30
 inde = [i for i in range(11)]
 inde1 = [i for i in range(10)]
+
 # 建立存储字典result
-result = {'name': 'null', 'sex': 'null', 'age': 0, 'average_x': [], 'cover': [], 'estimate': [],
+result = {'name': 'null', 'sex': 'null', 'age': 0, 'average_r': [], 'cover': [], 'estimate': [], 'group': [],
           'block': [], 'id': []}
 # gui
 myDlg = gui.Dlg(title="实验")
@@ -32,13 +33,15 @@ result['sex'] = ok_data[1]
 result['age'] = ok_data[2]
 
 # 读取刺激数据
-dots = pd.read_csv("increase_dots.csv")
+# 分布 r = kx+c, x[0~90]*10, k=0.1, c=10, r=55
+dots = pd.read_csv("all_dots.csv")
 tr_dots = pd.read_csv("train.csv")
 # 抽样总数
 sample_size = int(len(dots)/11)
 # 实验材料 [刺激, 遮挡位置0-2]
 # 正式实验刺激
 stims = [0]*3*sample_size
+adjust_size = [40, 70]*int(len(stims)/2)
 for i in range(sample_size):
     stims[3*i] = [dots[11*i:11*(i+1)], 0]
     stims[3*i][0].index = inde
@@ -47,42 +50,42 @@ for i in range(sample_size):
     stims[3*i+2] = [dots[11*i:11*(i+1)], 2]
     stims[3*i+2][0].index = inde
 # 练习刺激
-tr_stims = [0]*6
-tr_stims[0] = [dots[0:10], 0]
-tr_stims[0][0].index = inde1
-tr_stims[1] = [dots[0:10], 1]
-tr_stims[1][0].index = inde1
-tr_stims[2] = [dots[10:20], 1]
-tr_stims[2][0].index = inde1
-tr_stims[3] = [dots[10:20], 2]
-tr_stims[3][0].index = inde1
-tr_stims[4] = [dots[20:30], 2]
-tr_stims[4][0].index = inde1
-tr_stims[5] = [dots[20:30], 0]
-tr_stims[5][0].index = inde1
+tr_stims = [0]*3*3
+for i in range(3):
+    tr_stims[3*i] = [tr_dots[11*i:11*(i+1)], 0]
+    tr_stims[3*i][0].index = inde
+    tr_stims[3*i+1] = [tr_dots[11*i:11*(i+1)], 1]
+    tr_stims[3*i+1][0].index = inde
+    tr_stims[3*i+2] = [tr_dots[11*i:11*(i+1)], 2]
+    tr_stims[3*i+2][0].index = inde
 # 随机刺激样本
 random.shuffle(stims)
 random.shuffle(tr_stims)
+random.shuffle(adjust_size)
 # 窗口
-win = visual.Window(size=(w, h), units='pix', fullscr=True)
+win = visual.Window(size=(w, h), units='pix', fullscr=True, color=(-0.2, -0.2, -0.2))
 # 图片
 fix = visual.ImageStim(win, image="fix.png", size=64)
 pic = visual.ImageStim(win, size=64)
 adjust_circle = visual.Circle(win, radius=64, lineColor='white', fillColor='white')
 circle = visual.Circle(win, radius=64, lineColor='white', fillColor='white')
 block = visual.ShapeStim(win, lineColor='black', fillColor='black', closeShape=True)
+area = visual.ShapeStim(win, lineColor=(0,0,0), fillColor=(0,0,0), closeShape=True)
+area.vertices = ((-450, -h/2), (-450, h/2), (450, h/2), (450, -h/2))
 # 文本
 text_1 = visual.TextStim(win, text='按“↑”键或“↓”键调节圆半径大小', height=32, pos=(0, -200))
-lianxi = visual.TextStim(win, text='按“空格”键开始练习', height=64)
-zhengshi = visual.TextStim(win, text='按“空格”键开始正式实验', height=64)
+lianxi = visual.TextStim(win, text='按“空格”键开始练习', height=40)
+zhengshi = visual.TextStim(win, text='按“空格”键开始正式实验', height=40)
+rest = visual.TextStim(win, text='休息一下，按“空格”键继续', height=40)
 # 练习
 lianxi.draw()
 win.flip()
 event.waitKeys(keyList=['space'])
 flag = 0
 for i in range(len(tr_stims)):
-    adjust_circle.radius = 64
+    adjust_circle.radius = random.choice([40, 70])
     # 注视点
+    area.draw()
     fix.draw()
     win.flip()
     core.wait(0.3)
@@ -90,7 +93,8 @@ for i in range(len(tr_stims)):
     b_x1 = 300*tr_stims[i][1]
     b_x2 = b_x1+300
     # 刺激
-    for j in range(9):
+    area.draw()
+    for j in range(10):
         x, y, r= tr_stims[i][0]['x'][j], tr_stims[i][0]['y'][j], tr_stims[i][0]['r'][j]
         circle.pos = (x-450, y)
         circle.radius = r
@@ -102,10 +106,12 @@ for i in range(len(tr_stims)):
     win.flip()
     core.wait(2)
     # 空屏
+    area.draw()
     win.flip()
     core.wait(0.5)
     # 调节
     state = 'adjust'
+    area.draw()
     adjust_circle.draw()
     text_1.draw()
     win.flip()
@@ -125,28 +131,43 @@ for i in range(len(tr_stims)):
         if flag == 1:
             event.clearEvents()
             break
+        area.draw()
         adjust_circle.draw()
         text_1.draw()
         win.flip()
         event.clearEvents()
+
 # 实验
+area.draw()
 zhengshi.draw()
 win.flip()
 event.waitKeys(keyList=['space'])
-for i in range(len(stims)):
-    adjust_circle.radius = 64
+N = len(stims)
+for i in range(N):
+    if i in [int(N/4), int(N/2), int(3*N/4)]:
+        area.draw()
+        rest.draw()
+        win.flip()
+        key = event.waitKeys(keyList=['space', 'escape'])
+        if 'escape' in key:
+            break
+    adjust_circle.radius = adjust_size[i]
     # 注视点
+    area.draw()
     fix.draw()
     win.flip()
     core.wait(0.3)
     # 遮挡范围
     b_x1 = 300*stims[i][1]
     b_x2 = b_x1+300
+    area.draw()
     result['cover'].append(stims[i][1])
-    result['average_x'].append(stims[i][0]['r'][10])
+    result['average_r'].append(stims[i][0]['r'][10])
+    result['id'].append(stims[i][0]['num'][10])
+    result['group'].append(stims[i][0]['group'][10])
     # 刺激
     for j in range(10):
-        x, y, r, num= stims[i][0]['x'][j], stims[i][0]['y'][j], stims[i][0]['r'][j], stims[i][0]['num'][j]
+        x, y, r = stims[i][0]['x'][j], stims[i][0]['y'][j], stims[i][0]['r'][j]
         circle.pos = (x-450, y)
         circle.radius = r
         if (x<b_x1)or(x>b_x2):
@@ -157,10 +178,12 @@ for i in range(len(stims)):
     win.flip()
     core.wait(2)
     # 空屏
+    area.draw()
     win.flip()
     core.wait(0.5)
     # 调节
     state = 'adjust'
+    area.draw()
     adjust_circle.draw()
     text_1.draw()
     win.flip()
@@ -179,6 +202,7 @@ for i in range(len(stims)):
         elif 'escape' in key:
             win.close()
             core.quit()
+        area.draw()
         adjust_circle.draw()
         text_1.draw()
         win.flip()
@@ -187,11 +211,12 @@ for i in range(len(stims)):
 # 将实验结果写入文件
 with open("exp_data\\%s.csv" % (result['name']+time.strftime("%H-%M-%S")), 'a') as exp_data:
     exp_data.write(
-        'num' + ',' + 'name' + ',' + 'age' + ',' + 'sex' + ',' + 'average_r' + ',' + 'cover' + ','+'estimate_size'+'\n')
-    for i in range(len(result['average_x'])):
-        exp_data.write(str(i + 1) + ',' + result['name'] + ',' + str(result['age']) + ',' + result['sex'] + ',' +
-                       str(round(result['average_x'][i], 2)) + ',' +
-                       str(result['cover'][i]) + ',' + str(result['estimate'][i]) + '\n')
+        'num' + ',' + 'name' + ',' + 'age' + ',' + 'sex' + ',' + 'average_r' + ',' + 'cover' + ','+'estimate_size' + ','
+        + 'group' +'\n')
+    for i in range(len(result['average_r'])):
+        exp_data.write(str(result['id'][i]) + ',' + result['name'] + ',' + str(result['age']) + ',' + result['sex']
+                       + ',' + str(round(result['average_r'][i], 2)) + ',' +
+                       str(result['cover'][i]) + ',' + str(result['estimate'][i]) + ',' + result['group'][i]+ '\n')
 
 visual.TextStim(win, text="实验结束！", height=64).draw()
 win.flip()
