@@ -104,7 +104,8 @@ for i in range(len(tr_stims)):
     block.vertices = ((b_x1-450, -h/2), (b_x1-450, h/2), (b_x2-450, h/2), (b_x2-450, -h/2))
     block.draw()
     win.flip()
-    core.wait(2)
+    # 呈现时长
+    core.wait(1)
     # 空屏
     area.draw()
     win.flip()
@@ -156,7 +157,7 @@ for i in range(N):
     area.draw()
     fix.draw()
     win.flip()
-    core.wait(0.3)
+    core.wait(0.5)
     # 遮挡范围
     b_x1 = 300*stims[i][1]
     b_x2 = b_x1+300
@@ -176,7 +177,8 @@ for i in range(N):
     block.vertices = ((b_x1-450, -h/2), (b_x1-450, h/2), (b_x2-450, h/2), (b_x2-450, -h/2))
     block.draw()
     win.flip()
-    core.wait(2)
+    # 呈现时长
+    core.wait(1)
     # 空屏
     area.draw()
     win.flip()
