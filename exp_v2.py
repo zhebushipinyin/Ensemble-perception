@@ -9,8 +9,6 @@ import pandas as pd
 
 # 初始数据
 tial_times = 30
-inde = [i for i in range(11)]
-inde1 = [i for i in range(10)]
 
 # 建立存储字典result
 result = {'name': 'null', 'sex': 'null', 'age': 0, 'average_r': [], 'cover': [], 'estimate': [], 'group': [],
@@ -35,20 +33,42 @@ result['age'] = ok_data[2]
 # 读取刺激数据
 # 分布 r = kx+c, x[0~90]*10, k=0.1, c=10, r=55
 dots = pd.read_csv("all_dots.csv")
+inde = [i for i in range(11)]
 tr_dots = pd.read_csv("train.csv")
 # 抽样总数
 sample_size = int(len(dots)/11)
-# 实验材料 [刺激, 遮挡位置0-2]
+# 实验材料 [刺激, 遮挡位置0-2, 反映圆大小]
 # 正式实验刺激 sample_size = 20+20+40
-stims = [0]*3*sample_size
-adjust_size = [40, 70]*int(len(stims)/2)
+stims = [0]*4*sample_size
+pos = ['L', 'O', 'R', 'M']*80
+ad = [0]*4
+for i in range(len(ad)):
+    ad[i] = [40, 70]*40
+    random.shuffle(ad[i])
+adjust_size = ad[0]+ad[1]+ad[2]+ad[3]
+
 for i in range(sample_size):
-    stims[3*i] = [dots[11*i:11*(i+1)], 0]
-    stims[3*i][0].index = inde
-    stims[3*i+1] = [dots[11*i:11*(i+1)], 1]
-    stims[3*i+1][0].index = inde
-    stims[3*i+2] = [dots[11*i:11*(i+1)], 2]
-    stims[3*i+2][0].index = inde
+    stims[i] = [dots[11*i:11*(i+1)], 0, adjust_size[i]]
+    stims[i][0].index = inde
+    stims[80+i] = [dots[11*i:11*(i+1)], 0, adjust_size[i]]
+    stims[80+i][0].index = inde
+    stims[160+i] = [dots[11*i:11*(i+1)], 0, adjust_size[i]]
+    stims[160+i][0].index = inde
+    stims[240+i] = [dots[11*i:11*(i+1)], 0, adjust_size[i]]
+    stims[240+i][0].index = inde
+# 矩阵赋值，遮位置LORM
+for i in range(sample_size):
+    stims[i][1] = pos[i]
+    stims[80+i][1] = pos[80+i-1]
+    stims[160+i][1] = pos[80+i-2]
+    stims[240+i][1] = pos[80+i-3]
+stims = [x for x in stims if x[1] != 'O']
+a = [stims[0:60], stims[60:120], stims[120:180], stims[180:]]
+for each in a:
+    random.shuffle(a)
+random.shuffle(a)
+stims = a[0]+a[1]+a[2]+a[3]
+
 # 练习刺激
 tr_stims = [0]*3*3
 for i in range(3):
@@ -58,6 +78,7 @@ for i in range(3):
     tr_stims[3*i+1][0].index = inde
     tr_stims[3*i+2] = [tr_dots[11*i:11*(i+1)], 2]
     tr_stims[3*i+2][0].index = inde
+stims_block = [stims[:60], stims[60:120], stims[120:180], stims[180:]]
 # 随机刺激样本
 random.shuffle(stims)
 random.shuffle(tr_stims)
@@ -152,14 +173,19 @@ for i in range(N):
         key = event.waitKeys(keyList=['space', 'escape'])
         if 'escape' in key:
             break
-    adjust_circle.radius = adjust_size[i]
+    adjust_circle.radius = stims[i][2]
     # 注视点
     area.draw()
     fix.draw()
     win.flip()
     core.wait(0.5)
     # 遮挡范围
-    b_x1 = 300*stims[i][1]
+    if stims[i][1] == 'L':
+        b_x1 = 0
+    elif stims[i][1] == 'M':
+        b_x1 = 300
+    else:
+        b_x1 = 600
     b_x2 = b_x1+300
     area.draw()
     result['cover'].append(stims[i][1])
