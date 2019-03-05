@@ -85,12 +85,14 @@ random.shuffle(tr_stims)
 random.shuffle(adjust_size)
 # 窗口
 win = visual.Window(size=(w, h), units='pix', fullscr=True, color=(-0.2, -0.2, -0.2))
+myMouse = event.Mouse()
+myMouse.setVisible(0)
 # 图片
 fix = visual.ImageStim(win, image="fix.png", size=64)
 pic = visual.ImageStim(win, size=64)
+p_block = visual.ImageStim(win, size=(300, h), image="p.png")
 adjust_circle = visual.Circle(win, radius=64, lineColor='white', fillColor='white')
 circle = visual.Circle(win, radius=64, lineColor='white', fillColor='white')
-block = visual.ShapeStim(win, lineColor='black', fillColor='black', closeShape=True)
 area = visual.ShapeStim(win, lineColor=(0,0,0), fillColor=(0,0,0), closeShape=True)
 area.vertices = ((-450, -h/2), (-450, h/2), (450, h/2), (450, -h/2))
 # 文本
@@ -122,8 +124,8 @@ for i in range(len(tr_stims)):
         if (x<b_x1)or(x>b_x2):
             circle.draw()
     # 遮挡
-    block.vertices = ((b_x1-450, -h/2), (b_x1-450, h/2), (b_x2-450, h/2), (b_x2-450, -h/2))
-    block.draw()
+    p_block.pos = (b_x1-300, 0)
+    p_block.draw()
     win.flip()
     # 呈现时长
     core.wait(1)
@@ -200,8 +202,8 @@ for i in range(N):
         if (x<b_x1)or(x>b_x2):
             circle.draw()
     # 遮挡
-    block.vertices = ((b_x1-450, -h/2), (b_x1-450, h/2), (b_x2-450, h/2), (b_x2-450, -h/2))
-    block.draw()
+    p_block.pos = (b_x1-300, 0)
+    p_block.draw()
     win.flip()
     # 呈现时长
     core.wait(1)
