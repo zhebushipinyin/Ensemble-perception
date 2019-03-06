@@ -6,13 +6,14 @@ import random
 import time
 import tkinter
 import pandas as pd
+import numpy as np
 
 # 初始数据
 tial_times = 30
 
 # 建立存储字典result
 result = {'name': 'null', 'sex': 'null', 'age': 0, 'average_r': [], 'cover': [], 'estimate': [], 'group': [],
-          'block': [], 'id': []}
+          'block': [], 'id': [], 'm_1': [], 'm_2': []}
 # gui
 myDlg = gui.Dlg(title="实验")
 myDlg.addText('被试信息')
@@ -90,7 +91,7 @@ myMouse.setVisible(0)
 # 图片
 fix = visual.ImageStim(win, image="fix.png", size=64)
 pic = visual.ImageStim(win, size=64)
-p_block = visual.ImageStim(win, size=(300, h), image="p.png")
+p_block = visual.ImageStim(win, size=(300, h), image="p3.png")
 adjust_circle = visual.Circle(win, radius=64, lineColor='white', fillColor='white')
 circle = visual.Circle(win, radius=64, lineColor='white', fillColor='white')
 area = visual.ShapeStim(win, lineColor=(0,0,0), fillColor=(0,0,0), closeShape=True)
@@ -195,12 +196,31 @@ for i in range(N):
     result['id'].append(stims[i][0]['num'][10])
     result['group'].append(stims[i][0]['group'][10])
     # 刺激
+    model_s1 = np.array([])  # 模型1 不表征
+    model_s2 = np.array([])  # 模型2 就进取样
+    aa = []
     for j in range(10):
         x, y, r = stims[i][0]['x'][j], stims[i][0]['y'][j], stims[i][0]['r'][j]
         circle.pos = (x-450, y)
         circle.radius = r
-        if (x<b_x1)or(x>b_x2):
+        model_s2 = np.append(model_s2, r)
+        if (x < b_x1) or (x > b_x2):
             circle.draw()
+            model_s1 = np.append(model_s1, r)
+        else:
+            aa.append(j)
+    #  模型二元素计算
+    if aa[0] == 0:
+        for each in aa:
+            model_s2[each] = model_s2[aa[-1]]
+    elif aa[-1] == 9:
+        for each in aa:
+            model_s2[each] = model_s2[aa[0]]
+    else:
+        for each in aa:
+            model_s2[each] = (model_s2[aa[-1]]+model_s2[aa[0]])/2
+    result['m_1'].append(model_s1.mean())
+    result['m_2'].append(model_s2.mean())
     # 遮挡
     p_block.pos = (b_x1-300, 0)
     p_block.draw()
@@ -242,11 +262,12 @@ for i in range(N):
 with open("exp_data\\%s.csv" % (result['name']+time.strftime("%H-%M-%S")), 'a') as exp_data:
     exp_data.write(
         'num' + ',' + 'name' + ',' + 'age' + ',' + 'sex' + ',' + 'average_r' + ',' + 'cover' + ','+'estimate_size' + ','
-        + 'group' +'\n')
+        + 'group' + ',' + 'model1' + ',' + 'model2' + '\n')
     for i in range(len(result['average_r'])):
         exp_data.write(str(result['id'][i]) + ',' + result['name'] + ',' + str(result['age']) + ',' + result['sex']
-                       + ',' + str(round(result['average_r'][i], 2)) + ',' +
-                       str(result['cover'][i]) + ',' + str(result['estimate'][i]) + ',' + result['group'][i]+ '\n')
+                       + ',' + str(round(result['average_r'][i], 2)) + ',' + str(result['cover'][i]) + ',' +
+                       str(result['estimate'][i]) + ',' + result['group'][i] + ',' + str(result['m_1'][i]) + "," +
+                       str(result['m_2'][i]) + '\n')
 
 visual.TextStim(win, text="实验结束！", height=64).draw()
 win.flip()
