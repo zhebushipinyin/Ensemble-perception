@@ -168,14 +168,17 @@ zhengshi.draw()
 win.flip()
 event.waitKeys(keyList=['space'])
 N = len(stims)
+flag = 0
 for i in range(N):
     if i in [int(N/4), int(N/2), int(3*N/4)]:
+        flag += 1
         area.draw()
         rest.draw()
         win.flip()
         key = event.waitKeys(keyList=['space', 'escape'])
         if 'escape' in key:
             break
+    result['block'].append(flag)
     adjust_circle.radius = stims[i][2]
     # 注视点
     area.draw()
@@ -262,12 +265,12 @@ for i in range(N):
 with open("exp_data\\%s.csv" % (result['name']+time.strftime("%H-%M-%S")), 'a') as exp_data:
     exp_data.write(
         'num' + ',' + 'name' + ',' + 'age' + ',' + 'sex' + ',' + 'average_r' + ',' + 'cover' + ','+'estimate_size' + ','
-        + 'group' + ',' + 'model1' + ',' + 'model2' + '\n')
+        + 'group' + ',' + 'model1' + ',' + 'model2' + ',' + 'block' + '\n')
     for i in range(len(result['average_r'])):
         exp_data.write(str(result['id'][i]) + ',' + result['name'] + ',' + str(result['age']) + ',' + result['sex']
                        + ',' + str(round(result['average_r'][i], 2)) + ',' + str(result['cover'][i]) + ',' +
                        str(result['estimate'][i]) + ',' + result['group'][i] + ',' + str(result['m_1'][i]) + "," +
-                       str(result['m_2'][i]) + '\n')
+                       str(result['m_2'][i]) + ',' + str(result['block'][i]) + '\n')
 
 visual.TextStim(win, text="实验结束！", height=64).draw()
 win.flip()
