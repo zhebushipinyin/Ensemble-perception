@@ -275,7 +275,7 @@ for i in range(N):
 with open("exp_data\\%s.csv" % (result['name']+time.strftime("%H-%M-%S")), 'a') as exp_data:
     exp_data.write(
         'num' + ',' + 'name' + ',' + 'age' + ',' + 'sex' + ',' + 'average_r' + ',' + 'cover' + ','+'estimate_size' + ','
-        + 'group' + ',' + 'model1' + ',' + 'model2' + ',' + 'model3' + ',' + 'block' + '\n')
+        + 'group' + ',' + 'model1' + ',' + 'model2' + ',' + 'model3' + ',' + 'block' + ',' + 'adjust_size' + '\n')
     for i in range(len(result['average_r'])):
         exp_data.write(str(result['id'][i]) + ',' + result['name'] + ',' + str(result['age']) + ',' + result['sex']
                        + ',' + str(round(result['average_r'][i], 2)) + ',' + str(result['cover'][i]) + ',' +
