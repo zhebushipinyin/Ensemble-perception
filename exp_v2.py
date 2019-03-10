@@ -219,7 +219,10 @@ for i in range(N):
                 model_s3 = np.append(model_s3, 55)
             else:
                 model_s2 = np.append(model_s2, r)
-                model_s3 = np.append(model_s3, 0.1*b_x1+25)
+                if stims[i][0]['group'][10] == 'increase':
+                    model_s3 = np.append(model_s3, 0.1*b_x1+25)
+                else:
+                    model_s3 = np.append(model_s3, 110-25-0.1*b_x1)
     #  模型二元素计算
     if stims[i][0]['group'][10] != 'random':
         if aa[0] == 0:
