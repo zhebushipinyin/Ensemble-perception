@@ -73,8 +73,8 @@ for i in range(len(stims)):
     stims[i][2] = adjust_size[i]
 
 # 练习刺激
-tr_stims = [0]*3*3
-for i in range(3):
+tr_stims = [0]*4*3
+for i in range(4):
     tr_stims[3*i] = [tr_dots[11*i:11*(i+1)], 0]
     tr_stims[3*i][0].index = inde
     tr_stims[3*i+1] = [tr_dots[11*i:11*(i+1)], 1]
